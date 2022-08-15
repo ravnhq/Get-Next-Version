@@ -1,0 +1,16 @@
+name: 'Compare and Bump'
+description: 'Compare version numbers to package.json versions and bump'
+author: 'RavnHQ'
+inputs:
+  version:
+    required: false
+    description: 'Version to compare with the package.json version'
+  bump-type:
+    required: false
+    description: 'The bump type to perform'
+  package-json-path:
+    required: false
+    description: 'Path to package.json'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
