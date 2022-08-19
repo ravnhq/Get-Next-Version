@@ -57,7 +57,7 @@ async function run() {
 
     if (semver.lte(latestVersion, packageVersion)) {
       core.info('Package version is behind, bumping')
-      exec(
+      const newVersion = await exec(
         [
           'npm',
           'version',
@@ -70,8 +70,7 @@ async function run() {
         ].join(' ')
       )
 
-      const newVersion = require(versionFilePath).version
-      const {major, minor, patch} = semver.parse(newVersion)!
+      const {major, minor, patch} = semver.parse(`${newVersion}`)!
 
       core.setOutput('previous_version', packageVersion)
       core.setOutput('new_version', require(versionFilePath).version)
