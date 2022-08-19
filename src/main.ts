@@ -22,8 +22,6 @@ const gitSemverTagsAsync = async (options: gitSemverTags.Options = {}) =>
     })
   )
 
-const getPackageJson = () => require()
-
 async function run() {
   const versionToCompare = core.getInput('version')
   const bumpType = core.getInput('bump-type') || 'patch'
@@ -71,8 +69,15 @@ async function run() {
           bumpType
         ].join(' ')
       )
+
+      const newVersion = require(versionFilePath).version
+      const {major, minor, patch} = semver.parse(newVersion)!
+
       core.setOutput('previous_version', packageVersion)
       core.setOutput('new_version', require(versionFilePath).version)
+      core.setOutput('major', major)
+      core.setOutput('minor', minor)
+      core.setOutput('patch', patch)
       core.setOutput('bumped', true)
     } else {
       core.info('Package version is ahead, skipping')
