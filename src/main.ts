@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -57,23 +58,55 @@ async function run() {
 
     if (semver.lte(latestVersion, packageVersion)) {
       core.info('Package version is behind, bumping')
-      const newVersion = await exec(
+
+      console.log('SWAG')
+
+      let newVersion = ''
+      let versionError = ''
+
+      const options = {
+        listeners: {
+          stdout: (data: Buffer) => {
+            newVersion += data.toString()
+          },
+          stderr: (data: Buffer) => {
+            versionError += data.toString()
+          }
+        }
+      }
+
+      await exec(
+        'npm',
         [
-          'npm',
-          'version',
           `--prefix=${path.relative(
             process.cwd(),
             path.parse(versionFilePath).dir
           )}`,
           '--git-tag-version=false',
+          'version',
           bumpType
-        ].join(' ')
+        ],
+        options
       )
 
-      const {major, minor, patch} = semver.parse(`${newVersion}`)!
+      console.log(versionError)
+      if (versionError) {
+        return core.setFailed(versionError)
+      }
+
+      const cleanNewVersion = semver.clean(newVersion)
+      console.log(cleanNewVersion)
+
+      if (!semver.parse(cleanNewVersion)) {
+        return core.setFailed(`Error parsing version ${cleanNewVersion}`)
+      }
+
+      const {major, minor, patch} = semver.parse(cleanNewVersion)!
+
+      console.log({major, minor, patch, packageVersion, cleanNewVersion})
 
       core.setOutput('previous_version', packageVersion)
-      core.setOutput('new_version', require(versionFilePath).version)
+      core.setOutput('new_version', cleanNewVersion)
       core.setOutput('major', major)
       core.setOutput('minor', minor)
       core.setOutput('patch', patch)
@@ -83,8 +116,13 @@ async function run() {
       core.setOutput('bumped', false)
     }
   } catch (error) {
+    console.error(error)
     if (error instanceof Error) {
+      core.error(error)
       core.setFailed(error.message)
+    } else if (typeof error === 'string') {
+      core.error(error)
+      core.setFailed(error)
     }
   }
 }

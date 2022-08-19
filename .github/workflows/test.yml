@@ -11,12 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          npm install
-      - run: |
-          npm run all
+      - run: yarn install
+      - run: yarn all
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ./
+        id: compare_and_bump
+      - name: Dump
+        env:
+          DUMP: ${{ toJson(steps.compare_and_bump.outputs) }}
+        run: echo "$DUMP"

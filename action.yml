@@ -11,6 +11,19 @@ inputs:
   package-json-path:
     required: false
     description: 'Path to package.json'
+outputs:
+  previous_version:
+    description: 'Version that was bumped'
+  new_version:
+    description: 'Version that previous version was bumped to'
+  major:
+    description: 'Major piece of new version'
+  minor:
+    description: 'Minor piece of new version'
+  patch:
+    description: 'Patch piece of new version'
+  bumped:
+    description: 'Whether or not a bump was actually done'
 runs:
   using: 'node16'
   main: 'dist/index.js'
